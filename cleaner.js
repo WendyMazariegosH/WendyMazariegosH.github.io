@@ -1,5 +1,5 @@
 // MIT License
-//
+// 
 
 function reflex_agent(location, state) {
     if (state == "DIRTY") return "CLEAN";
@@ -18,16 +18,10 @@ function test(states) {
 
     let currentState = `${location}-${stateA}-${stateB}`;
 
-    // Si ya hemos visitado este estado, lo ignoramos
+    // Si el estado ya fue visitado, ignorarlo y continuar
     if (!visitedStates.has(currentState)) {
         visitedStates.add(currentState);
         step++; // Contar solo estados nuevos
-    } else {
-        // Si el estado ya fue visitado, evitar un bucle infinito
-        if (visitedStates.size >= 8) {
-            document.getElementById("log").innerHTML += "<br>✅ Todos los 8 estados han sido visitados. Deteniendo ejecución.";
-            return;
-        }
     }
 
     // Mostrar el estado ANTES de ejecutar la acción
@@ -51,6 +45,13 @@ function test(states) {
     if (visitedStates.size >= 8) {
         document.getElementById("log").innerHTML += "<br>✅ Todos los 8 estados han sido visitados. Deteniendo ejecución.";
         return;
+    }
+
+    // Si ya se han visitado más de 8 veces pero no se han cubierto todos los estados, forzar el recorrido cambiando aleatoriamente el estado
+    if (step > 8 && visitedStates.size < 8) {
+        document.getElementById("log").innerHTML += "<br>⚠️ Error detectado: Estado repetido en el paso 5. Reajustando estrategia.";
+        states[1] = Math.random() < 0.5 ? "DIRTY" : "CLEAN";
+        states[2] = Math.random() < 0.5 ? "DIRTY" : "CLEAN";
     }
 
     // Llamar recursivamente después de 2 segundos
