@@ -1,47 +1,62 @@
 // MIT License
 //
 
-let visitedStates = new Set(); // Guarda los estados visitados
-
-function getStateKey(location, stateA, stateB) {
-    return `${location}-${stateA}-${stateB}`;
-}
-
-function reflex_agent(location, state){
+function reflex_agent(location, state) {
     if (state == "DIRTY") return "CLEAN";
     else if (location == "A") return "RIGHT";
     else if (location == "B") return "LEFT";
 }
 
-function test(states){
-    let location = states[0];
-    let stateA = states[1];
-    let stateB = states[2];
-    
-    let currentStateKey = getStateKey(location, stateA, stateB);
-    visitedStates.add(currentStateKey);
-    
-    document.getElementById("log").innerHTML += `<br>Location: ${location} | State A: ${stateA} | State B: ${stateB} | Visited: ${visitedStates.size}/8`;
-    
-    if (visitedStates.size >= 8) {
-        document.getElementById("log").innerHTML += "<br>All states visited. Stopping.";
-        return;
+// Conjunto para rastrear estados visitados
+let visitedStates = new Set();
+let step = 0;
+
+function test(states) {
+    let location = states[0];    
+    let stateA = states[1];  
+    let stateB = states[2];  
+
+    let currentState = `${location}-${stateA}-${stateB}`;
+
+    // Si ya hemos visitado este estado, lo ignoramos
+    if (!visitedStates.has(currentState)) {
+        visitedStates.add(currentState);
+        step++; // Contar solo estados nuevos
+    } else {
+        // Si el estado ya fue visitado, evitar un bucle infinito
+        if (visitedStates.size >= 8) {
+            document.getElementById("log").innerHTML += "<br>✅ Todos los 8 estados han sido visitados. Deteniendo ejecución.";
+            return;
+        }
     }
-    
-    let state = (location == "A") ? stateA : stateB;
-    let action_result = reflex_agent(location, state);
-    
-    document.getElementById("log").innerHTML += ` | Action: ${action_result}`;
-    
+
+    // Mostrar el estado ANTES de ejecutar la acción
+    document.getElementById("log").innerHTML += `<br><b>🔵 Estado #${step}</b>: Location: ${location} | State A: ${stateA} | State B: ${stateB}`;
+
+    // Obtener la acción del agente
+    let action_result = reflex_agent(location, location == "A" ? stateA : stateB);
+
+    // Ejecutar la acción
     if (action_result == "CLEAN") {
         if (location == "A") states[1] = "CLEAN";
         else if (location == "B") states[2] = "CLEAN";
-    }
+    } 
     else if (action_result == "RIGHT") states[0] = "B";
     else if (action_result == "LEFT") states[0] = "A";
-    
-    setTimeout(() => test(states), 1000);
+
+    // Mostrar el estado DESPUÉS de la acción
+    document.getElementById("log").innerHTML += `<br>🟢 Acción: ${action_result} | Nuevo estado: Location: ${states[0]} | State A: ${states[1]} | State B: ${states[2]}`;
+
+    // Detener cuando se hayan visitado los 8 estados únicos
+    if (visitedStates.size >= 8) {
+        document.getElementById("log").innerHTML += "<br>✅ Todos los 8 estados han sido visitados. Deteniendo ejecución.";
+        return;
+    }
+
+    // Llamar recursivamente después de 2 segundos
+    setTimeout(function() { test(states); }, 2000);
 }
 
+// Estado inicial: La aspiradora está en "A" y ambos lados están sucios
 var states = ["A", "DIRTY", "DIRTY"];
 test(states);
